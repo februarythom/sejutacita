@@ -4,24 +4,11 @@ const app = express();
 
 const mongoose = require('mongoose');
 const keys = require('./keys').default;
-// const User = require('./models/user.model');
 const user_controller = require('./controllers/user.controller');
 
-console.log(keys)
 mongoose.connect(
     keys.DB_CONN_STRING,
     () => user_controller.SetDefaultAdmin()
-    // () => {
-    //     console.log('mongodb connected')
-    //     const user = new User({
-    //         username: 'admin',
-    //         password: 'admin',
-    //         role: 'admin'
-    //     });
-
-    //     user.save();
-
-    // }
 );
 
 // middileware

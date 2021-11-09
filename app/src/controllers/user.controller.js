@@ -75,6 +75,48 @@ function GenerateRefreshToken(user_id) {
 
 async function GetUsers(req, res) {
 
+    const user_id = req.userData.sub;
+    const user = await User.findOne({_id: user_id}).exec();
+
+    if(user) {
+
+        const username = req.body.username;
+
+        if(username) {
+
+            if(user.username === username) {
+                return res.json({status: false, message: "Success", data : {username: user.username, role: user.role}});
+            } else {
+
+                if(user.role === 'admin') {
+
+                    const userToFind = await User.findOne({username: username}).exec();
+
+                    if(userToFind) {
+                        return res.json({status: false, message: "Success.", data : {username: usertoFind.username, role: userToFind.role}});
+                    }
+                } else {
+                    return res.json({status: false, message: "Success", data : {username: user.username, role: user.role}});
+                }
+            }
+
+        } else {
+
+            if(user.role === 'admin') {
+                const alluser = await User.find().exec();
+                res.json({status: false, message: "Success", data : alluser.map((alluser) => {
+                    return  {username: user.username, role: user.role};
+                })});
+            } else {
+                return res.json({status: false, message: "Success", data : {username: user.username, role: user.role}});
+            }
+
+        }
+
+
+    } else {
+        return res.json({status: false, message: "ACCESS DENIED."});
+    }
 }
 
 async function SetDefaultAdmin() {
