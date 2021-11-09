@@ -1,0 +1,47 @@
+version: '3.2'
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    volumes:
+      - ./config/redis.conf:/redis.conf
+    command: [ "redis-server", "/redis.conf" ]
+  mongodb:
+    image : mongo
+    container_name: mongodb
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ./mongodata:/data/db
+    ports:
+      - 27017:27017
+    restart: unless-stopped
+  nodejs:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./app/src
+    ports:
+      - '3000:3000'
+    environment:
+      JWT_ACCESS_SECRET: '99d4a1a48868c5588d7f6d0bac8ce77706ad3f4b6e59eb123794c59e36d2c08d9e72cf261b4a5d31847a53983ac02d8dfdedca2adcde5c36064041ad3887bfc0'
+      JWT_REFRESH_SECRET: '03a0c937cfd288951fa06e5851aa075e5bc249fed9c37c22719fa334e42485424f0522362379fe1d1961cb5a885a7411c922faa9c586b7e72869c387b091903d'
+      JWT_ACCESS_TIME: '1d'
+      JWT_REFRESH_TIME: '30d'
+      REDIS_HOST: 'redis'
+      REDIS_PORT: '6379'
+      DB_CONN_STRING: 'mongodb://mongodb:27017/nodejsjwtauth'
+    volumes:
+      - type: bind
+        source: ./app/src
+        target: /app/src
+
+    container_name: nodejs
+    depends_on:
+      - mongodb
+      - redis
+    restart: on-failure
+    hostname: nodejs
+
+
